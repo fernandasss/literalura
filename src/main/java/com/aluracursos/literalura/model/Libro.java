@@ -2,6 +2,8 @@ package com.aluracursos.literalura.model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "libro")
 public class Libro {
@@ -10,8 +12,11 @@ public class Libro {
     private Long Id;
     @Column(unique = true) //este atributo es único, no se puede repetir.
     private String titulo;
-    private String autor;
-    private String idioma;
+    @ManyToOne
+    @JoinColumn(name ="autor_id")
+    private Autor autor;
+    @Enumerated(EnumType.STRING)
+    private Idioma idioma;
     private Double numeroDescargas;
 
     
@@ -19,8 +24,7 @@ public class Libro {
 
     public Libro(DatosLibro datosLibro) {
         this.titulo = datosLibro.titulo();
-        this.autor = datosLibro.autor().toString();
-        this.idioma = datosLibro.idioma().toString();
+        this.idioma = Idioma.fromString(datosLibro.idioma().toString());
         this.numeroDescargas = datosLibro.numeroDescargas();
     }
 
@@ -52,19 +56,12 @@ public class Libro {
         this.titulo = titulo;
     }
 
-    public String getAutor() {
+    public Autor getAutor() {
         return autor;
     }
 
-    public void setAutor(String autor) {
+    public void setAutor(Autor autor) {
         this.autor = autor;
-    }
-    public String getIdioma() {
-        return idioma;
-    }
-
-    public void setIdioma(String idioma) {
-        this.idioma = idioma;
     }
 
     public Double getNumeroDescargas() {

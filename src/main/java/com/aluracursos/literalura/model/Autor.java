@@ -11,10 +11,30 @@ public class Autor {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
+    @Column(unique = true)
     private String nombre;
-    private Integer añoNacimiento;
-    private Integer añoFallecimiento;
+    private String fechaNacimiento;
+    private String fechaFallecimiento;
+    @OneToMany(mappedBy = "autor", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<Libro> libro;
 
+    public Autor(){}
+
+    public Autor(DatosAutor datosAutor) {
+        this.nombre = datosAutor.nombre();
+        this.fechaNacimiento = datosAutor.fechaDeNacimiento();
+        this.fechaFallecimiento = datosAutor.fechaDefallecimiento();
+    }
+
+    @Override
+    public String toString() {
+        return "Autor{" +
+                "Id=" + Id +
+                ", nombre='" + nombre + '\'' +
+                ", añoNacimiento='" + fechaNacimiento + '\'' +
+                ", añoFallecimiento='" + fechaFallecimiento + '\'' +
+                '}';
+    }
 
     public Long getId() {
         return Id;
@@ -32,19 +52,27 @@ public class Autor {
         this.nombre = nombre;
     }
 
-    public Integer getAñoNacimiento() {
-        return añoNacimiento;
+    public String getAñoNacimiento() {
+        return fechaNacimiento;
     }
 
-    public void setAñoNacimiento(Integer añoNacimiento) {
-        this.añoNacimiento = añoNacimiento;
+    public void setAñoNacimiento(String añoNacimiento) {
+        this.fechaNacimiento = añoNacimiento;
     }
 
-    public Integer getAñoFallecimiento() {
-        return añoFallecimiento;
+    public String getAñoFallecimiento() {
+        return fechaFallecimiento;
     }
 
-    public void setAñoFallecimiento(Integer añoFallecimiento) {
-        this.añoFallecimiento = añoFallecimiento;
+    public void setAñoFallecimiento(String añoFallecimiento) {
+        this.fechaFallecimiento = añoFallecimiento;
+    }
+
+    public List<Libro> getLibro() {
+        return libro;
+    }
+
+    public void setLibro(List<Libro> libro) {
+        this.libro = libro;
     }
 }
