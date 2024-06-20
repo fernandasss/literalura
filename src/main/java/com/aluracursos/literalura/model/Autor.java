@@ -1,8 +1,5 @@
 package com.aluracursos.literalura.model;
-
 import jakarta.persistence.*;
-
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -13,8 +10,8 @@ public class Autor {
     private Long Id;
     @Column(unique = true)
     private String nombre;
-    private String fechaNacimiento;
-    private String fechaFallecimiento;
+    private Integer fechaDeNacimiento;
+    private Integer fechaDeFallecimiento;
     @OneToMany(mappedBy = "autor", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Libro> libro;
 
@@ -22,8 +19,8 @@ public class Autor {
 
     public Autor(DatosAutor datosAutor) {
         this.nombre = datosAutor.nombre();
-        this.fechaNacimiento = datosAutor.fechaDeNacimiento();
-        this.fechaFallecimiento = datosAutor.fechaDefallecimiento();
+        this.fechaDeNacimiento = datosAutor.fechaDeNacimiento();
+        this.fechaDeFallecimiento = datosAutor.fechaDeFallecimiento();
     }
 
     @Override
@@ -31,10 +28,11 @@ public class Autor {
         return "Autor{" +
                 "Id=" + Id +
                 ", nombre='" + nombre + '\'' +
-                ", añoNacimiento='" + fechaNacimiento + '\'' +
-                ", añoFallecimiento='" + fechaFallecimiento + '\'' +
+                ", fechaDeNacimiento='" + fechaDeNacimiento + '\'' +
+                ", fechaDeFallecimiento='" + fechaDeFallecimiento + '\'' +
                 '}';
     }
+
 
     public Long getId() {
         return Id;
@@ -52,20 +50,8 @@ public class Autor {
         this.nombre = nombre;
     }
 
-    public String getAñoNacimiento() {
-        return fechaNacimiento;
-    }
-
-    public void setAñoNacimiento(String añoNacimiento) {
-        this.fechaNacimiento = añoNacimiento;
-    }
-
-    public String getAñoFallecimiento() {
-        return fechaFallecimiento;
-    }
-
-    public void setAñoFallecimiento(String añoFallecimiento) {
-        this.fechaFallecimiento = añoFallecimiento;
+    public void setFechaDeFallecimiento(Integer fechaDeFallecimiento) {
+        this.fechaDeFallecimiento = fechaDeFallecimiento;
     }
 
     public List<Libro> getLibro() {
@@ -74,5 +60,17 @@ public class Autor {
 
     public void setLibro(List<Libro> libro) {
         this.libro = libro;
+    }
+
+    public Integer getFechaDeFallecimiento() {
+        return fechaDeFallecimiento;
+    }
+
+    public Integer getFechaDeNacimiento() {
+        return fechaDeNacimiento;
+    }
+
+    public void setFechaDeNacimiento(Integer fechaDeNacimiento) {
+        this.fechaDeNacimiento = fechaDeNacimiento;
     }
 }

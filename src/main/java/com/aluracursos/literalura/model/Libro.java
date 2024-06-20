@@ -2,18 +2,14 @@ package com.aluracursos.literalura.model;
 
 import jakarta.persistence.*;
 
-import java.util.List;
-
 @Entity
 @Table(name = "libro")
 public class Libro {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long Id;
     @Column(unique = true) //este atributo es único, no se puede repetir.
     private String titulo;
     @ManyToOne
-    @JoinColumn(name ="autor_id")
     private Autor autor;
     @Enumerated(EnumType.STRING)
     private Idioma idioma;
@@ -72,4 +68,10 @@ public class Libro {
         this.numeroDescargas = numeroDescargas;
     }
 
+    public Idioma getIdioma() {
+        return idioma;
+    }
+    public void setIdioma(Idioma idioma) {
+        this.idioma = idioma;
+    }
 }

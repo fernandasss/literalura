@@ -8,7 +8,6 @@ import com.aluracursos.literalura.service.ConvierteDatos;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Scanner;
 
 public class Principal {
@@ -19,6 +18,7 @@ public class Principal {
     private RepositorioAutor repositorioAutor;
     Scanner teclado = new Scanner(System.in);
     private List<Libro> libro = new ArrayList<>();
+    private List<Autor> autor = new ArrayList<>();
 
 
     public Principal(RepositorioLibro repositorio, RepositorioAutor repositorioAutor) {
@@ -54,12 +54,12 @@ public class Principal {
                 case 2:
                     mostrarLibrosBuscados();
                     break;
-////                case 3:
-////                    mostrarAutoresBuscados();
-////                    break;
-////                case 4:
-////                    mostrarAutoresVivos();
-////                    break;
+                case 3:
+                    mostrarAutoresBuscados();
+                    break;
+                case 4:
+                    mostrarAutoresVivos();
+                    break;
                 case 5:
                     mostrarLibrosPorIdioma();
                     break;
@@ -72,52 +72,117 @@ public class Principal {
         }
     }
 
+    private Libro convertirDatosLibroAEntidad(DatosLibro datosLibro){
+        Libro libro = new Libro();
+        if(datosLibro !=null){
+            libro.setTitulo(datosLibro.titulo());
+            libro.setNumeroDescargas(datosLibro.numeroDescargas());
+            libro.setId(datosLibro.id());
+            Idioma idioma = null;
+            if(idioma != null){
+                for (String idiomaAPI : datosLibro.idioma()){
+                    idioma = Idioma.fromString(idiomaAPI);
+                    libro.setIdioma(idioma);
+                }
+            }else {
+                libro.setIdioma(Idioma.OTRO);
+            }
+            if (datosLibro.autor() != null){
+                DatosAutor datosAutor = datosLibro.autor().stream().findFirst().orElse(null);
+                Autor existente = repositorioAutor.findByNombreAndFechaDeNacimientoAndFechaDeFallecimiento(
+                        datosAutor.nombre(),
+                        datosAutor.fechaDeNacimiento(),
+                        datosAutor.fechaDeFallecimiento());
+                if (existente == null) {
+                    Autor autor = new Autor();
+                    autor.setNombre(datosAutor.nombre());
+                    autor.setFechaDeNacimiento(datosAutor.fechaDeNacimiento());
+                    autor.setFechaDeFallecimiento(datosAutor.fechaDeFallecimiento());
+                    repositorioAutor.save(autor);
+                    libro.setAutor(autor);
+                }else{
+                    libro.setAutor(existente);
+                }
+            }
+            repositorio.save(libro);
+        }
+        return libro;
+    }
 
-    private DatosResultados buscarLibro() {
+    private DatosLibro getDatosLibro() {
         System.out.println("Escriba el nombre del libro que desea buscar:");
         var nombreLibro = teclado.nextLine();
         var json = consumoAPI.obtenerDatos(URL_BASE + "?search=" + nombreLibro.replace(" ", "+"));
         DatosResultados datosBusqueda = conversor.obtenerDatos(json, DatosResultados.class);
         System.out.println(datosBusqueda.resultados());
+        return datosBusqueda.resultados().stream().findFirst().orElse(null);
+    }
 
-        Optional<DatosLibro> libroBuscado = datosBusqueda.resultados().stream()
-                .filter(l -> l.titulo().toUpperCase().contains(nombreLibro.toUpperCase()))
-                .findFirst();
-        if (libroBuscado.isPresent()) {
-            System.out.println("Libro encontrado.");
-            System.out.println(libroBuscado.get());
-              Libro libro = new Libro(libroBuscado.get());
-              repositorio.save(libro);
-              Autor autor = new Autor();
-              repositorioAutor.save(autor);
-
-        } else {
-            System.out.println("Libro no encontrado.");
-        }
-        return datosBusqueda;
+    private void buscarLibro(){
+        DatosLibro datosLibro = getDatosLibro();
+        Libro libro = convertirDatosLibroAEntidad(datosLibro);
+        System.out.println(datosLibro);
     }
 
     private void mostrarLibrosBuscados() {
-        libro =repositorio.findAll();
+        libro = repositorio.findAll();
         libro.stream()
                 .forEach(System.out::println);
     }
 
+    private void mostrarAutoresBuscados(){
+        autor = repositorioAutor.findAll();
+        autor.stream().forEach(System.out::println);
+    }
+
+    private void mostrarAutoresVivos(){
+        System.out.println("Escriba el año que desea buscar:");
+        var fechaBuscada = teclado.nextInt();
+        teclado.nextLine();
+        List<Autor> autoresVivos = repositorioAutor.autoresVivos(fechaBuscada);
+        System.out.println("Los autores vivos son:");
+        autoresVivos.forEach(System.out::println);
+
+    }
+
     private void mostrarLibrosPorIdioma() {
-        System.out.println("Escriba el idioma que desea buscar.");
-        var idioma = teclado.nextLine();
-        var lenguaje = Idioma.fromEspanol(idioma);
+        System.out.println("Ingrese el idioma para buscar libros:\n" +
+                "es - Español\n" +
+                "en - Inglés\n" +
+                "fr - Francés\n" +
+                "pt - Portugués");
+        var idiomaUsuario = teclado.nextLine().trim().toLowerCase();
+        var lenguaje = Idioma.fromEspanol(idiomaUsuario);
         List<Libro> librosPorIdioma = repositorio.findByIdioma(lenguaje);
-        System.out.println("Los libros en " + idioma + "registrados son los siguientes:");
+        System.out.println("Los libros en " + idiomaUsuario + " registrados son los siguientes:");
         librosPorIdioma.forEach(System.out::println);
     }
-//        private void  {
-//            DatosResultados datos = getResultados();
-//            Libro libro = new Libro();
-//            repositorio.save(libro);
-//            System.out.println(datos);
+
+
+
+
+//        Optional<DatosLibro> libroBuscado = datosBusqueda.resultados().stream()
+//                .filter(l -> l.titulo().toUpperCase().contains(nombreLibro.toUpperCase()))
+//                .findFirst();
+//        if (libroBuscado.isPresent()) {
+//            System.out.println("Libro encontrado.");
+//            System.out.println(libroBuscado.get());
+//              Libro libro = new Libro(libroBuscado.get());
+//              repositorio.save(libro);
+//              Autor autor = new Autor();
+//              repositorioAutor.save(autor);
+//
+//        } else {
+//            System.out.println("Libro no encontrado.");
 //        }
 
+    }
 
-        }
+
+
+
+
+
+
+
 

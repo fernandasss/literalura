@@ -1,10 +1,11 @@
 package com.aluracursos.literalura.model;
 
 public enum Idioma {
-    INGLES ("EN", "EN - Inglés"),
-    ESPAÑOL ("ES", "ES - Español"),
-    FRANCES ("FR", "FR - Francés"),
-    PORTUGUES ("PT", "PT - Portugués");
+    INGLES ("EN", "Inglés"),
+    ESPAÑOL ("ES", "Español"),
+    FRANCES ("FR", "Francés"),
+    PORTUGUES ("PT", "Portugués"),
+    OTRO ("Otro", "Otro");
 
 
     private String idiomaApi;
