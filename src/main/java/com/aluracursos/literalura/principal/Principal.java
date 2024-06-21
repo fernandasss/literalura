@@ -6,9 +6,7 @@ import com.aluracursos.literalura.repository.RepositorioLibro;
 import com.aluracursos.literalura.service.ConsumoAPI;
 import com.aluracursos.literalura.service.ConvierteDatos;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Principal {
     private static final String URL_BASE = "https://gutendex.com/books/";
@@ -19,6 +17,7 @@ public class Principal {
     Scanner teclado = new Scanner(System.in);
     private List<Libro> libro = new ArrayList<>();
     private List<Autor> autor = new ArrayList<>();
+
 
 
     public Principal(RepositorioLibro repositorio, RepositorioAutor repositorioAutor) {
@@ -38,56 +37,64 @@ public class Principal {
                     2 - Mostrar libros buscados.
                     3 - Mostrar autores buscados.
                     4 - Mostrar autores vivos en determinado año.
-                    5 - Exhibir cantidad de libros en un determinado idioma.
+                    5 - Mostrar libros en un determinado idioma.
 
 
                     0 - Salir
                     """;
-            System.out.println(menu);
-            opcion = teclado.nextInt();
-            teclado.nextLine();
 
-            switch (opcion) {
-                case 1:
-                    buscarLibro();
-                    break;
-                case 2:
-                    mostrarLibrosBuscados();
-                    break;
-                case 3:
-                    mostrarAutoresBuscados();
-                    break;
-                case 4:
-                    mostrarAutoresVivos();
-                    break;
-                case 5:
-                    mostrarLibrosPorIdioma();
-                    break;
-                case 0:
-                    System.out.println("Cerrando la aplicación...");
-                    break;
-                default:
-                    System.out.println("Opción inválida");
+            while (opcion != 0) {
+                System.out.println(menu);
+                try {
+                    opcion = teclado.nextInt();
+                    teclado.nextLine();
+                } catch (InputMismatchException e) {
+                    System.out.println("Entrada inválida, intente nuevamente.");
+                    teclado.nextLine();
+                    continue;
+                }
+                switch (opcion) {
+                    case 1:
+                        buscarLibro();
+                        break;
+                    case 2:
+                        mostrarLibrosBuscados();
+                        break;
+                    case 3:
+                        mostrarAutoresBuscados();
+                        break;
+                    case 4:
+                        mostrarAutoresVivos();
+                        break;
+                    case 5:
+                        mostrarLibrosPorIdioma();
+                        break;
+                    case 0:
+                        System.out.println("Cerrando la aplicación...");
+                        break;
+                    default:
+                        System.out.println("Opción inválida");
+                }
             }
         }
     }
 
-    private Libro convertirDatosLibroAEntidad(DatosLibro datosLibro){
+    private Libro convertirDatosLibroAEntidad(DatosLibro datosLibro) {
         Libro libro = new Libro();
-        if(datosLibro !=null){
+        if (datosLibro != null) {
             libro.setTitulo(datosLibro.titulo());
             libro.setNumeroDescargas(datosLibro.numeroDescargas());
             libro.setId(datosLibro.id());
-            Idioma idioma = null;
-            if(idioma != null){
-                for (String idiomaAPI : datosLibro.idioma()){
+            Idioma idioma;
+            if (datosLibro.idioma() != null) {
+                for (String idiomaAPI : datosLibro.idioma()) {
                     idioma = Idioma.fromString(idiomaAPI);
                     libro.setIdioma(idioma);
                 }
-            }else {
+            } else {
                 libro.setIdioma(Idioma.OTRO);
             }
-            if (datosLibro.autor() != null){
+            if (datosLibro.autor() != null) {
                 DatosAutor datosAutor = datosLibro.autor().stream().findFirst().orElse(null);
                 Autor existente = repositorioAutor.findByNombreAndFechaDeNacimientoAndFechaDeFallecimiento(
                         datosAutor.nombre(),
@@ -100,7 +107,7 @@ public class Principal {
                     autor.setFechaDeFallecimiento(datosAutor.fechaDeFallecimiento());
                     repositorioAutor.save(autor);
                     libro.setAutor(autor);
-                }else{
+                } else {
                     libro.setAutor(existente);
                 }
             }
@@ -118,10 +125,10 @@ public class Principal {
         return datosBusqueda.resultados().stream().findFirst().orElse(null);
     }
 
-    private void buscarLibro(){
+    private void buscarLibro() {
         DatosLibro datosLibro = getDatosLibro();
         Libro libro = convertirDatosLibroAEntidad(datosLibro);
-        System.out.println(datosLibro);
+        System.out.println(libro);
     }
 
     private void mostrarLibrosBuscados() {
@@ -130,53 +137,54 @@ public class Principal {
                 .forEach(System.out::println);
     }
 
-    private void mostrarAutoresBuscados(){
+    private void mostrarAutoresBuscados() {
         autor = repositorioAutor.findAll();
         autor.stream().forEach(System.out::println);
     }
 
-    private void mostrarAutoresVivos(){
+    private void mostrarAutoresVivos() {
         System.out.println("Escriba el año que desea buscar:");
-        var fechaBuscada = teclado.nextInt();
-        teclado.nextLine();
-        List<Autor> autoresVivos = repositorioAutor.autoresVivos(fechaBuscada);
-        System.out.println("Los autores vivos son:");
-        autoresVivos.forEach(System.out::println);
+        try {
+            var fechaBuscada = teclado.nextInt();
+            teclado.nextLine();
+            List<Autor> autoresVivos = repositorioAutor.autoresVivos(fechaBuscada);
+            if (autoresVivos.isEmpty()) {
+                System.out.println("No hay autores vivos registrados ese año.");
+            } else {
+                System.out.println("Los autores vivos son:");
+                autoresVivos.forEach(System.out::println);
+            }
+        }catch (InputMismatchException e) {
+                System.out.println("Entrada no válida, intente nuevamente.");
+                teclado.nextLine();
+            }
 
     }
 
     private void mostrarLibrosPorIdioma() {
-        System.out.println("Ingrese el idioma para buscar libros:\n" +
-                "es - Español\n" +
-                "en - Inglés\n" +
-                "fr - Francés\n" +
-                "pt - Portugués");
-        var idiomaUsuario = teclado.nextLine().trim().toLowerCase();
-        var lenguaje = Idioma.fromEspanol(idiomaUsuario);
-        List<Libro> librosPorIdioma = repositorio.findByIdioma(lenguaje);
-        System.out.println("Los libros en " + idiomaUsuario + " registrados son los siguientes:");
-        librosPorIdioma.forEach(System.out::println);
+        System.out.println("""
+                  Ingrese el idioma para buscar libros:
+                  es - Español
+                  en - Inglés
+                  fr - Francés
+                  pt - Portugués
+                """);
+        try {
+            var idiomaUsuario = teclado.nextLine();
+            var lenguaje = Idioma.fromString(idiomaUsuario);
+            List<Libro> librosPorIdioma = repositorio.findByIdioma(lenguaje);
+            if(librosPorIdioma.isEmpty()){
+                System.out.println("No hay libros registrados en ese idioma.");
+            }else {
+                System.out.println("Los libros en el idioma elegido son los siguientes:");
+                librosPorIdioma.forEach(System.out::println);
+            }
+        } catch (IllegalArgumentException e) {
+            System.out.println("No encontrado, intente nuevamente.");
+            mostrarLibrosPorIdioma();
+        }
     }
-
-
-
-
-//        Optional<DatosLibro> libroBuscado = datosBusqueda.resultados().stream()
-//                .filter(l -> l.titulo().toUpperCase().contains(nombreLibro.toUpperCase()))
-//                .findFirst();
-//        if (libroBuscado.isPresent()) {
-//            System.out.println("Libro encontrado.");
-//            System.out.println(libroBuscado.get());
-//              Libro libro = new Libro(libroBuscado.get());
-//              repositorio.save(libro);
-//              Autor autor = new Autor();
-//              repositorioAutor.save(autor);
-//
-//        } else {
-//            System.out.println("Libro no encontrado.");
-//        }
-
-    }
+}
 
 
 

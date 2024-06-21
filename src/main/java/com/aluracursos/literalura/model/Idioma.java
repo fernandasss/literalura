@@ -1,10 +1,10 @@
 package com.aluracursos.literalura.model;
 
 public enum Idioma {
-    INGLES ("EN", "Inglés"),
-    ESPAÑOL ("ES", "Español"),
-    FRANCES ("FR", "Francés"),
-    PORTUGUES ("PT", "Portugués"),
+    INGLES ("en", "Inglés"),
+    ESPAÑOL ("es", "Español"),
+    FRANCES ("fr", "Francés"),
+    PORTUGUES ("pt", "Portugués"),
     OTRO ("Otro", "Otro");
 
 
@@ -26,9 +26,9 @@ public enum Idioma {
     }
 
     public static Idioma fromEspanol(String text) {
-        for (Idioma categoria : Idioma.values()) {
-            if (categoria.idiomaEspañol.equalsIgnoreCase(text)) {
-                return categoria;
+        for (Idioma idioma : Idioma.values()) {
+            if (idioma.idiomaEspañol.equalsIgnoreCase(text)) {
+                return idioma;
             }
         }
         throw new IllegalArgumentException("Idioma no encontrado: " + text);

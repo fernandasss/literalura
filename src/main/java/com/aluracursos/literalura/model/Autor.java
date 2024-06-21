@@ -23,6 +23,10 @@ public class Autor {
         this.fechaDeFallecimiento = datosAutor.fechaDeFallecimiento();
     }
 
+    public Autor(List<Libro> libro) {
+        this.libro = libro;
+    }
+
     @Override
     public String toString() {
         return "Autor{" +
